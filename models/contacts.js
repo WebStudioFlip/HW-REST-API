@@ -1,14 +1,57 @@
-// const fs = require('fs/promises')
+const fs = require("fs").promises;
+const path = require("path");
+const { nanoid } = require("nanoid");
 
-const listContacts = async () => {}
+async function updateContact(contactsList) {
+  await fs.writeFile(contactsPath, JSON.stringify(contactsList, null, 2));
+}
 
-const getContactById = async (contactId) => {}
+async function listContacts() {
+  const data = await fs.readFile(contactsPath);
+  const result = JSON.parse(data);
+  return result;
+}
 
-const removeContact = async (contactId) => {}
+async function getContactById(contactId) {
+  const contactsList = await listContacts();
+  const result = contactsList.find(
+    ({ id }) => id.toString() === contactId.toString()
+  );
+  if (!result) {
+    return null;
+  }
+  return result;
+}
 
-const addContact = async (body) => {}
+async function removeContact(contactId) {
+  const contactsList = await listContacts();
+  const index = contactsList.findIndex(
+    ({ id }) => id.toString() === contactId.toString()
+  );
+  if (index === -1) {
+    return null;
+  }
+  const [result] = contactsList.splice(index, 1);
+  await updateContacts(contactsList);
+  return result;
+}
 
-const updateContact = async (contactId, body) => {}
+async function addContact(name, email, phone) {
+  if (!name || !email || !phone) {
+    return null;
+  }
+  const contactsList = await listContacts();
+
+  const newContact = {
+    name,
+    email,
+    phone,
+    id: nanoid(),
+  };
+  contactsList.push(newContact);
+  await updateContact(contactsList);
+  return newContact;
+}
 
 module.exports = {
   listContacts,
@@ -16,4 +59,4 @@ module.exports = {
   removeContact,
   addContact,
   updateContact,
-}
+};
