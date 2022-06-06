@@ -12,6 +12,12 @@ const schema = Joi.object({
   phone: Joi.string().required(),
 });
 
+const schemaPut = Joi.object({
+  name: Joi.string(),
+  email: Joi.string().email(),
+  phone: Joi.string(),
+}).or('name', 'email', 'phone');
+
 router.get('/', async (req, res, next) => {
   try {
     const result = await contacts.listContacts();
@@ -71,7 +77,7 @@ router.delete('/:id', async (req, res, next) => {
 
 router.put('/:id', async (req, res, next) => {
   try {
-    const { error } = schema.validate(req.body);
+    const { error } = schemaPut.validate(req.body);
     if (error) {
       res.status(400).json({
         message: "missing fields",
